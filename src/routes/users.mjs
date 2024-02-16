@@ -22,6 +22,17 @@ checkSchema(checkQueryParamsSchema),
 (req, res) => {
 // console.log(req.query)
 // console.log(req['express-validator#contexts'])
+
+console.log(req.session, req.sessionID);
+req.sessionStore.get(req.sessionID, (err, sessionData) => {
+    if (err) {
+        console.log(err);
+        throw err;
+    }
+    console.log(sessionData)
+})
+
+
 const result = validationResult(req);
 // console.log(result);
 if (!result.isEmpty()) {
@@ -118,6 +129,33 @@ router.delete('/api/users/:id', resolveIndexByUserId, (req, res) => {
 
     mockUsers.splice(findUserIndex, 1);
     return res.sendStatus(200);
-})
+});
+
+// POST AND GET REQUEST FOR USERS SESSIONS
+
+// router.post('/api/auth', (req, res) => {
+
+//     const { body: { username, password } } = req;
+
+//     const findUser = mockUsers.find(user => user.username === username);
+
+//     if (!findUser || findUser.password !== password) return res.status(401).send({ msg: 'BAD CREDENTIALS'});
+
+//     req.session.user = findUser;
+
+//     return res.status(200).send(findUser);
+
+// });
+
+// router.get('/api/auth/status', (req, res) => {
+
+//     // console.log(req.session)
+    
+//     req.sessionStore.get(req.sessionID, (err, session) => {
+//         console.log(session)
+//     });
+    
+//     return req.session.user ? res.status(200).send(req.session.user) : res.status(401).send({ msg: "Not Authenticated"});
+// })
 
 export default router;
