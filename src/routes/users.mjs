@@ -3,6 +3,8 @@ import { createUserValidationSchema, checkQueryParamsSchema } from './../../util
 import { query, checkSchema, validationResult, matchedData } from "express-validator";
 import { mockUsers } from "../../utils/constants.mjs";
 import { resolveIndexByUserId } from "../../utils/middlewares.mjs";
+import { User } from '../mongoose/schemas/user.mjs';
+import { hashPassword } from "../../utils/helpers.mjs";
 
 const router = Router();
 
@@ -157,5 +159,32 @@ router.delete('/api/users/:id', resolveIndexByUserId, (req, res) => {
     
 //     return req.session.user ? res.status(200).send(req.session.user) : res.status(401).send({ msg: "Not Authenticated"});
 // })
+
+// DATABASE USERS
+router.post(
+    "/api/dbusers",
+    checkSchema(createUserValidationSchema),
+    async (req, res) => {
+
+    const result = validationResult(req);
+
+    if (!result.isEmpty()) return res.status(400).send(result.array());
+
+    const data = matchedData(req);
+
+    data.password = hashPassword(data.password);
+    console.log(data);
+
+    const newUser = new User(data);
+    console.log(data);
+
+    try {
+        const savedUser = await newUser.save();
+        return res.status(201).send(savedUser);
+    } catch (error) {
+        console.log(error);
+        return res.sendStatus(400);
+    }
+});
 
 export default router;
