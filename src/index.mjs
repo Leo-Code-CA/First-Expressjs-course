@@ -4,12 +4,13 @@ import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import passport from 'passport';
 import mongoose from 'mongoose';
-import "./stategies/local-strategy.mjs";
+import MongoStore from 'connect-mongo';
+// import "./stategies/local-strategy.mjs";
+import "./strategies/discord_strategy.mjs";
 
 const app = express();
 
-mongoose.connect(""
-)
+mongoose.connect("mongodb://localhost/express_tutorial")
 .then(() => console.log('Connected to database'))
 .catch((err) => console.log(err));
 
@@ -22,7 +23,10 @@ app.use(session({
     resave: false,
     cookie: {
         maxAge: 60000 * 60
-    }
+    },
+    store: MongoStore.create({
+        client: mongoose.connection.getClient()
+    })
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -49,7 +53,8 @@ app.post('/api/auth', passport.authenticate("local"), (req, res) => {
 app.get('/api/auth/status', (req, res) => {
     console.log(`Inside /auth/status endpoint`);
     console.log(req.user);
-    console.log(req.session)
+    console.log(req.session);
+    console.log(req.sessionID);
     return req.user ? res.send(req.user) : res.sendStatus(401);
 
 })
@@ -61,8 +66,15 @@ app.post('/api/auth/logout', (req, res) => {
         if (err) return res.sendStatus(400);
         res.sendStatus(200);
     })
-})
+});
 
+// WITH OAUTH2 - DISCORD
+app.get('/api/auth/discord', passport.authenticate('discord'));
+
+app.get('/api/auth/discord/redirect', passport.authenticate('discord'), (req, res) => {
+    console.log(req.session, req.user)
+    res.sendStatus(200);
+})
 
 
 

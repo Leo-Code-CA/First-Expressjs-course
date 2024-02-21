@@ -187,4 +187,39 @@ router.post(
     }
 });
 
+
+router.get('/api/dbusers', 
+checkSchema(checkQueryParamsSchema),
+(req, res) => {
+
+req.sessionStore.get(req.sessionID, (err, sessionData) => {
+    if (err) {
+        console.log(err);
+        throw err;
+    }
+    console.log("Inside Session Store Get")
+    console.log(sessionData)
+})
+
+const result = validationResult(req);
+
+if (!result.isEmpty()) {
+    return res.status(400).send({ errors: result.array() })
+}
+
+const data = matchedData(req);
+
+
+const { query: { value} } = req;
+const { filter } = data;
+
+if (filter && value) {
+    return res.send(mockUsers.filter(user => {
+        return user[filter].includes(value);
+    }))
+}
+
+return res.send(mockUsers);
+});
+
 export default router;
