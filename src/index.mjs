@@ -10,7 +10,8 @@ import "./strategies/discord_strategy.mjs";
 
 const app = express();
 
-mongoose.connect("mongodb://localhost/express_tutorial")
+// mongoose.connect("mongodb://localhost/express_tutorial")
+mongoose.connect("")
 .then(() => console.log('Connected to database'))
 .catch((err) => console.log(err));
 
